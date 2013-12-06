@@ -46,7 +46,7 @@ def pointer(x):
 
 
 def load(x):
-    """Loads DLL library where argument is location of library"""
+    """Loads a library where argument is location of library"""
     x = ctypes.cdll.LoadLibrary(x)
     return x
 
@@ -57,10 +57,10 @@ def load(x):
 
 if __name__ == '__main__':
 
-    """ Load the picam.dll """
+    """ Load the libpicam.so library """
     # picamDll = 'C:/Users/becgroup/Documents/Python/DriverTest/Princeton Instruments/Picam/Runtime/Picam.dll'
-    picamDll = 'DLLs/Picam.dll'
-    picam = load(picamDll)
+    picamLibrary = 'libpicam.so'
+    picam = load(picamLibrary)
     
     print 'Initialize Camera.',Picam_InitializeLibrary()
     print '\n'
@@ -77,8 +77,8 @@ if __name__ == '__main__':
     ## Test Routine to connect a demo camera
     ## p23
     print 'Preparing to connect Demo Camera'   
-    model = ctypes.c_int(10)
-    serial_number = ctypes.c_char_p('Demo Cam 1')
+    model = ctypes.c_int(428)
+    serial_number = ctypes.c_char_p('12345')
     PicamID = PicamCameraID()  
     """
     PICAM_API Picam_ConnectDemoCamera(
@@ -86,7 +86,7 @@ if __name__ == '__main__':
     const pichar*  serial_number,
     PicamCameraID* id );
     """
-    print 'Demo camera connetcted with return value = ',Picam_ConnectDemoCamera(model, serial_number, pointer(PicamID))
+    print 'Demo camera connected with return value = ',Picam_ConnectDemoCamera(model, serial_number, pointer(PicamID))
     print '\n'
     
     print 'Camera model is ',PicamID.model
@@ -100,9 +100,29 @@ if __name__ == '__main__':
     """
     PICAM_API Picam_OpenFirstCamera( PicamHandle* camera );
     """
-    camera = PicamHandle()
-    print 'Opening First Camera', Picam_OpenFirstCamera(ctypes.addressof(camera))
 
+    camera = PicamHandle()
+    print 'Opening First Camera'
+
+    #print Picam_OpenFirstCamera(ctypes.addressof(camera))
+    print Picam_OpenFirstCamera(pointer(camera))
+
+    ## Set ADC rate to high
+    #     error = Picam_SetParameterFloatingPointValue(
+    #             camera,
+    #             PicamParameter_AdcSpeed,
+    #             4.0 );
+    # PrintError( error ); 
+
+
+    print Picam_SetParameterFloatingPointValue(camera, ctypes.c_int(PicamParameter_AdcSpeed), pi32f(4.0))
+
+    ## Commit parameters: 
+    failed_parameters = ctypes.c_int() # not sure this is "the right thing" but it seems to work
+    failed_parameters_count = piint()
+    print Picam_CommitParameters(camera, ctypes.byref(failed_parameters), ctypes.byref(failed_parameters_count))
+    print "Cleaning up..."
+    print Picam_DestroyParameters(failed_parameters)
 
     ## Test routine to acquire image
     ## p73
@@ -135,7 +155,7 @@ if __name__ == '__main__':
     } PicamAvailableData;
     """
     readout_count = pi64s(1)
-    readout_time_out = piint(1000)
+    readout_time_out = piint(-1) # same as NO_TIMEOUT?
     available = PicamAvailableData()
 
     """ Print Debug Information on initial readout """
@@ -154,30 +174,32 @@ if __name__ == '__main__':
     PicamAcquisitionErrorsMask* errors );
     """
     Picam_Acquire.argtypes = PicamHandle, pi64s, piint, ctypes.POINTER(PicamAvailableData), ctypes.POINTER(PicamAcquisitionErrorsMask)
+
     Picam_Acquire.restype = piint
     
-    print '\nAcquiring... ',Picam_Acquire(camera, readout_count, readout_time_out, ctypes.byref(available), ctypes.byref(errors))
+    print '\nAcquiring... '
+    print Picam_Acquire(camera, readout_count, readout_time_out, ctypes.byref(available), ctypes.byref(errors))
     print '\n'
-
+    print 'step a'
+    
     print "available.initial_readout: ",available.initial_readout
     print "Initial readout type is", type(available.initial_readout)
     print '\n'
     
     """ Close out Library Resources """
     ## Disconnected the above cameras
-    print 'Disconnecting demo camera', Picam_DisconnectDemoCamera(pointer(PicamID))
-    ## Close down library    
-    print 'Uninitializing',Picam_UninitializeLibrary()
+    print 'Disconnecting demo camera...'
+    print Picam_DisconnectDemoCamera(pointer(PicamID))
 
 
 
     """ Test Routine to Access Data """
     
-    """ Create an array type to hold 1024x1024 16bit integers """
-    DataArrayType = pi16u*1048576
+    """ Create an array type to hold 1300x400 16bit integers """
+    DataArrayType = pi16u*520000
 
     """ Create pointer type for the above array type """
-    DataArrayPointerType = ctypes.POINTER(pi16u*1048576)
+    DataArrayPointerType = ctypes.POINTER(pi16u*520000)
 
     """ Create an instance of the pointer type, and point it to initial readout contents (memory address?) """
     DataPointer = ctypes.cast(available.initial_readout,DataArrayPointerType)
@@ -188,7 +210,7 @@ if __name__ == '__main__':
 
 
     """ Write contents of Data to binary file"""
-    libc = ctypes.cdll.msvcrt
+    libc = ctypes.CDLL('libc.so.6')
     fopen = libc.fopen
     fopen.argtypes = ctypes.c_char_p, ctypes.c_char_p
     fopen.restype = ctypes.c_void_p
@@ -205,3 +227,11 @@ if __name__ == '__main__':
     print 'fwrite returns: ',fwrite(data, readoutstride.value, 1, fp)
 
     fclose(fp)
+    
+    ## Close camera
+    print "Closing camera..."
+    print Picam_CloseCamera(camera)
+
+    ## Close down library    
+    print 'Uninitializing...'
+    print Picam_UninitializeLibrary()
