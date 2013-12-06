@@ -1,1 +1,1 @@
-seems to work up until aquire, then a crash. Have to be root to run it tho
+Fixed the strange config parameter issue. I love c pointers, references and everything else that I forgot after CS 101.
