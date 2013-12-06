@@ -43,3 +43,8 @@ PiTypes.py
 PiTypesMore.py
 PiFunctions.py
 PiParameterLookup.py
+
+2013 December 5 -- Modifications for use in Linux (DawesLab)
+------------------------------
+Import .so library instead of DLLs
+load libc.so.6 instead of windows libc
