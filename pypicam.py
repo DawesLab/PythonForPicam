@@ -113,7 +113,7 @@ class PyPICAM():
         # TODO, check this stuff for slowdowns
         rawdata = DataPointer.contents
         numpydata = numpy.frombuffer(rawdata, dtype='uint16')
-        data = numpy.reshape(numpydata,(1300,400))  # TODO: get dimensions officially,
+        data = numpy.reshape(numpydata,(400,1300))  # TODO: get dimensions officially,
         # note, the readoutstride is the number of bytes in the array, not the number of elements
         # will need to be smarter about the array size, but for now it works.
         return data
