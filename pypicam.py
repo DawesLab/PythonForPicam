@@ -97,7 +97,7 @@ class PyPICAM():
         print Picam_Acquire(self.camera, self.readout_count, self.readout_time_out, ctypes.byref(self.available), ctypes.byref(self.errors))
 
     def get_data(self):
-        """ Test Routine to Access Data """
+        """ Routine to access initial data """
 
         """ Create an array type to hold 1340x400 16bit integers """
         DataArrayType = pi16u*536000
@@ -117,6 +117,30 @@ class PyPICAM():
         # note, the readoutstride is the number of bytes in the array, not the number of elements
         # will need to be smarter about the array size, but for now it works.
         return data
+
+    def get_all_data(self):
+        """ Routine to access all data shots from multi-shot run"""
+        shotcount = self.available.readout_count
+
+        """ Create an array type to hold 1340x400 16bit integers """
+        DataArrayType = pi16u*536000
+
+        """ Create pointer type for the above array type """
+        DataArrayPointerType = ctypes.POINTER(pi16u*536000)
+
+        """ Create an instance of the pointer type, and point it to initial readout contents (memory address?) """
+        DataPointer = ctypes.cast(self.available.initial_readout,DataArrayPointerType)
+
+
+        """ Create a separate array with readout contents """
+        # TODO, check this stuff for slowdowns
+        rawdata = DataPointer.contents
+        numpydata = numpy.frombuffer(rawdata, dtype='uint16')
+        data = numpy.reshape(numpydata,(400,1340))  # TODO: get dimensions officially,
+        # note, the readoutstride is the number of bytes in the array, not the number of elements
+        # will need to be smarter about the array size, but for now it works.
+        return data
+
 
 
 
