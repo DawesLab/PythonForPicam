@@ -99,11 +99,11 @@ class PyPICAM():
     def get_data(self):
         """ Test Routine to Access Data """
 
-        """ Create an array type to hold 1300x400 16bit integers """
-        DataArrayType = pi16u*520000
+        """ Create an array type to hold 1340x400 16bit integers """
+        DataArrayType = pi16u*536000
 
         """ Create pointer type for the above array type """
-        DataArrayPointerType = ctypes.POINTER(pi16u*520000)
+        DataArrayPointerType = ctypes.POINTER(pi16u*536000)
 
         """ Create an instance of the pointer type, and point it to initial readout contents (memory address?) """
         DataPointer = ctypes.cast(self.available.initial_readout,DataArrayPointerType)
@@ -113,7 +113,7 @@ class PyPICAM():
         # TODO, check this stuff for slowdowns
         rawdata = DataPointer.contents
         numpydata = numpy.frombuffer(rawdata, dtype='uint16')
-        data = numpy.reshape(numpydata,(400,1300))  # TODO: get dimensions officially,
+        data = numpy.reshape(numpydata,(400,1340))  # TODO: get dimensions officially,
         # note, the readoutstride is the number of bytes in the array, not the number of elements
         # will need to be smarter about the array size, but for now it works.
         return data
