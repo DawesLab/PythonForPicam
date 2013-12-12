@@ -4,7 +4,7 @@
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or any 
+    the Free Software Foundation, either version 3 of the License, or any
     later version.
 
     This program is distributed in the hope that it will be useful,
@@ -14,7 +14,7 @@
 
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
-    
+
 """
 
 """Test for talking to Picam"""
@@ -38,7 +38,7 @@ from PiParameterLookup import *
 ############################
 ##### Custom Functions #####
 ############################
-    
+
 def pointer(x):
     """Returns a ctypes pointer"""
     ptr = ctypes.pointer(x)
@@ -61,7 +61,7 @@ if __name__ == '__main__':
     # picamDll = 'C:/Users/becgroup/Documents/Python/DriverTest/Princeton Instruments/Picam/Runtime/Picam.dll'
     picamLibrary = 'libpicam.so'
     picam = load(picamLibrary)
-    
+
     print 'Initialize Camera.',Picam_InitializeLibrary()
     print '\n'
 
@@ -76,10 +76,10 @@ if __name__ == '__main__':
 
     ## Test Routine to connect a demo camera
     ## p23
-    print 'Preparing to connect Demo Camera'   
+    print 'Preparing to connect Demo Camera'
     model = ctypes.c_int(428)
     serial_number = ctypes.c_char_p('12345')
-    PicamID = PicamCameraID()  
+    PicamID = PicamCameraID()
     """
     PICAM_API Picam_ConnectDemoCamera(
     PicamModel     model,
@@ -88,7 +88,7 @@ if __name__ == '__main__':
     """
     print 'Demo camera connected with return value = ',Picam_ConnectDemoCamera(model, serial_number, pointer(PicamID))
     print '\n'
-    
+
     print 'Camera model is ',PicamID.model
     print 'Camera computer interface is ',PicamID.computer_interface
     print 'Camera sensor_name is ', PicamID.sensor_name
@@ -112,12 +112,12 @@ if __name__ == '__main__':
     #             camera,
     #             PicamParameter_AdcSpeed,
     #             4.0 );
-    # PrintError( error ); 
+    # PrintError( error );
 
 
     print Picam_SetParameterFloatingPointValue(camera, ctypes.c_int(PicamParameter_AdcSpeed), pi32f(4.0))
 
-    ## Commit parameters: 
+    ## Commit parameters:
     failed_parameters = ctypes.c_int() # not sure this is "the right thing" but it seems to work
     failed_parameters_count = piint()
     print Picam_CommitParameters(camera, ctypes.byref(failed_parameters), ctypes.byref(failed_parameters_count))
@@ -176,16 +176,25 @@ if __name__ == '__main__':
     Picam_Acquire.argtypes = PicamHandle, pi64s, piint, ctypes.POINTER(PicamAvailableData), ctypes.POINTER(PicamAcquisitionErrorsMask)
 
     Picam_Acquire.restype = piint
-    
+
     print '\nAcquiring... '
     print Picam_Acquire(camera, readout_count, readout_time_out, ctypes.byref(available), ctypes.byref(errors))
     print '\n'
     print 'step a'
-    
+
     print "available.initial_readout: ",available.initial_readout
     print "Initial readout type is", type(available.initial_readout)
     print '\n'
-    
+
+    print '\nAcquiring again... '
+    print Picam_Acquire(camera, readout_count, readout_time_out, ctypes.byref(available), ctypes.byref(errors))
+    print '\n'
+    print 'step b'
+
+    print "available.initial_readout: ",available.initial_readout
+    print "Initial readout type is", type(available.initial_readout)
+    print '\n'
+
     """ Close out Library Resources """
     ## Disconnected the above cameras
     print 'Disconnecting demo camera...'
@@ -194,7 +203,7 @@ if __name__ == '__main__':
 
 
     """ Test Routine to Access Data """
-    
+
     """ Create an array type to hold 1300x400 16bit integers """
     DataArrayType = pi16u*520000
 
@@ -227,11 +236,11 @@ if __name__ == '__main__':
     print 'fwrite returns: ',fwrite(data, readoutstride.value, 1, fp)
 
     fclose(fp)
-    
+
     ## Close camera
     print "Closing camera..."
     print Picam_CloseCamera(camera)
 
-    ## Close down library    
+    ## Close down library
     print 'Uninitializing...'
     print Picam_UninitializeLibrary()

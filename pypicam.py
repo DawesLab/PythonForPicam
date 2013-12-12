@@ -76,10 +76,19 @@ class PyPICAM():
     available = PicamAvailableData()
     errors = PicamAcquisitionErrorsMask()
 
+
     def __init__(self):
         print 'Opening First Camera'
-        print Picam_OpenFirstCamera(pointer(self.camera))
+        print Picam_OpenFirstCamera(ctypes.byref(self.camera))
         print "Getting readout stride. ", Picam_GetParameterIntegerValue( self.camera, ctypes.c_int(PicamParameter_ReadoutStride), ctypes.byref(self.readoutstride) );
+
+
+    def close(self):
+        """ Close camera and uninitialize PICAM library"""
+        print 'closing camera'
+        Picam_CloseCamera(self.camera)
+        Picam_UninitializeLibrary()
+
 
     def configure_camera(self):
         print "Setting 4 MHz ADC rate..."
@@ -121,6 +130,7 @@ class PyPICAM():
     def get_all_data(self):
         """ Routine to access all data shots from multi-shot run"""
         shotcount = self.available.readout_count
+        stride = self.readoutstride.value
 
         """ Create an array type to hold 1340x400 16bit integers """
         DataArrayType = pi16u*536000
@@ -128,17 +138,19 @@ class PyPICAM():
         """ Create pointer type for the above array type """
         DataArrayPointerType = ctypes.POINTER(pi16u*536000)
 
-        """ Create an instance of the pointer type, and point it to initial readout contents (memory address?) """
-        DataPointer = ctypes.cast(self.available.initial_readout,DataArrayPointerType)
+        data = numpy.zeros((400,1340,shotcount))
+
+        for shot in range(shotcount):
+            """ Create an instance of the pointer type, and point it to initial readout (memory address) """
+            DataPointer = ctypes.cast(self.available.initial_readout + stride*shot, DataArrayPointerType)
 
 
-        """ Create a separate array with readout contents """
-        # TODO, check this stuff for slowdowns
-        rawdata = DataPointer.contents
-        numpydata = numpy.frombuffer(rawdata, dtype='uint16')
-        data = numpy.reshape(numpydata,(400,1340))  # TODO: get dimensions officially,
-        # note, the readoutstride is the number of bytes in the array, not the number of elements
-        # will need to be smarter about the array size, but for now it works.
+            """ Create a separate array with readout contents """
+            # TODO, check this stuff for slowdowns
+            rawdata = DataPointer.contents
+            numpydata = numpy.frombuffer(rawdata, dtype='uint16')
+            data[:,:,shot] = numpy.reshape(numpydata,(400,1340))
+
         return data
 
 
