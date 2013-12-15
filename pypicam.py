@@ -90,9 +90,11 @@ class PyPICAM():
         Picam_UninitializeLibrary()
 
 
-    def configure_camera(self):
+    def configure_camera(self, T=-120):
         print "Setting 4 MHz ADC rate..."
         print Picam_SetParameterFloatingPointValue(self.camera, ctypes.c_int(PicamParameter_AdcSpeed), pi32f(4.0))
+        print "Setting temp setpoint to -120C"
+        print Picam_SetParameterFloatingPointValue(self.camera, ctypes.c_int(PicamParameter_SensorTemperatureSetPoint), pi32f(-120.0))
 
         ## Commit parameters:
         failed_parameters = ctypes.c_int() # not sure this is "the right thing" but it seems to work
@@ -100,6 +102,12 @@ class PyPICAM():
         print Picam_CommitParameters(self.camera, ctypes.byref(failed_parameters), ctypes.byref(failed_parameters_count))
         print "Cleaning up..."
         print Picam_DestroyParameters(failed_parameters)
+
+
+    def get_temp(self):
+        temp = pi32f()
+        print Picam_GetParameterFloatingPointValue(self.camera, ctypes.c_int(PicamParameter_SensorTemperatureReading), ctypes.byref(temp))
+        return temp
 
     def acquire(self, N=1):
         self.readout_count = pi64s(N)
