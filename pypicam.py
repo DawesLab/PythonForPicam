@@ -95,7 +95,11 @@ class PyPICAM():
         print Picam_SetParameterFloatingPointValue(self.camera, ctypes.c_int(PicamParameter_AdcSpeed), pi32f(4.0))
         print "Setting temp setpoint to -120C"
         print Picam_SetParameterFloatingPointValue(self.camera, ctypes.c_int(PicamParameter_SensorTemperatureSetPoint), pi32f(-120.0))
-
+        
+        print "Setting trigger to expose during pulse"
+        TriggerResponse = PicamTriggerResponse_ExposeDuringTriggerPulse()
+        print Picam_SetParameterIntegerValue(self.camera, ctypes_c_int(PicamParameter_TriggerResponse), TriggerResponse)
+    
         ## Commit parameters:
         failed_parameters = ctypes.c_int() # not sure this is "the right thing" but it seems to work
         failed_parameters_count = piint()
