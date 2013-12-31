@@ -52,8 +52,12 @@ PiParameterLookup.py
 
 2013 December 8 -- Modifications for use in Linux (DawesLab)
 ------------------------------
-- Import .so library instead of DLLs
-- pypicam.py is written as a basic module to provide simple access
+- Import `libpicam.so` library instead of DLLs
+- `pypicam.py` is written as a basic module to provide simple access
 to the first camera loaded by the system.
+
+TODO
+-----------------------------
+Handle some of the enum types in the Picam properties. Settings like TriggerResponse need to be set as integers now since there is no lookup table for these options. Parse picam.h to generate the necessary info.
 
 
