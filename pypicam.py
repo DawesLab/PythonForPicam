@@ -97,7 +97,7 @@ class PyPICAM():
         print "Setting temp setpoint to -120C"
         print Picam_SetParameterFloatingPointValue(self.camera, ctypes.c_int(PicamParameter_SensorTemperatureSetPoint), pi32f(-120.0))
 
-        print "Setting trigger to readout per trigger"
+        print "Setting trigger to shift per trigger"
     # From picam.h: the enumeration of these options is:
     # PicamTriggerResponse_NoResponse               = 1,
     # PicamTriggerResponse_ReadoutPerTrigger        = 2,
@@ -105,7 +105,7 @@ class PyPICAM():
     # PicamTriggerResponse_ExposeDuringTriggerPulse = 4,
     # PicamTriggerResponse_StartOnSingleTrigger     = 5
 
-        TriggerResponse = ctypes.c_int(2)  # readout per trigger
+        TriggerResponse = ctypes.c_int(3)  # readout per trigger
         #print Picam_SetParameterIntegerValue(self.camera, ctypes.c_int(PicamParameter_TriggerResponse), TriggerResponse)
 
         ## Commit parameters:
