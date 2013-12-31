@@ -91,12 +91,13 @@ class PyPICAM():
 
 
     def configure_camera(self, T=-120):
+        """ Sets 4 MHz ADC rate, temp parameter can be set as integer (Default T=-120) """
         print "Setting 4 MHz ADC rate..."
         print Picam_SetParameterFloatingPointValue(self.camera, ctypes.c_int(PicamParameter_AdcSpeed), pi32f(4.0))
         print "Setting temp setpoint to -120C"
         print Picam_SetParameterFloatingPointValue(self.camera, ctypes.c_int(PicamParameter_SensorTemperatureSetPoint), pi32f(-120.0))
 
-        print "Setting trigger to expose during pulse"
+        print "Setting trigger to readout per trigger"
     # From picam.h: the enumeration of these options is:
     # PicamTriggerResponse_NoResponse               = 1,
     # PicamTriggerResponse_ReadoutPerTrigger        = 2,
@@ -104,8 +105,8 @@ class PyPICAM():
     # PicamTriggerResponse_ExposeDuringTriggerPulse = 4,
     # PicamTriggerResponse_StartOnSingleTrigger     = 5
 
-        TriggerResponse = piint(2)  # readout per trigger
-        print Picam_SetParameterIntegerValue(self.camera, ctypes_c_int(PicamParameter_TriggerResponse), TriggerResponse)
+        TriggerResponse = ctypes.c_int(2)  # readout per trigger
+        #print Picam_SetParameterIntegerValue(self.camera, ctypes.c_int(PicamParameter_TriggerResponse), TriggerResponse)
 
         ## Commit parameters:
         failed_parameters = ctypes.c_int() # not sure this is "the right thing" but it seems to work
@@ -125,7 +126,8 @@ class PyPICAM():
         print Picam_Acquire(self.camera, self.readout_count, self.readout_time_out, ctypes.byref(self.available), ctypes.byref(self.errors))
 
     def get_data(self):
-        """ Routine to access initial data """
+        """ Routine to access initial data.
+        Returns numpy array with shape (400,1340) """
 
         """ Create an array type to hold 1340x400 16bit integers """
         DataArrayType = pi16u*536000
@@ -147,7 +149,8 @@ class PyPICAM():
         return data
 
     def get_all_data(self):
-        """ Routine to access all data shots from multi-shot run"""
+        """ Routine to access all data shots from multi-shot run.
+        Returns numpy array with shape (400,1340,shotcount)."""
         shotcount = self.available.readout_count
         stride = self.readoutstride.value
 
