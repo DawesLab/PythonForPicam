@@ -72,7 +72,7 @@ class PyPICAM():
     camera = PicamHandle()
     readoutstride = piint(0);
     readout_count = pi64s(1)
-    readout_time_out = piint(-1) # same as NO_TIMEOUT?
+    readout_time_out = piint(-1) # -1 is same as NO_TIMEOUT?
     available = PicamAvailableData()
     errors = PicamAcquisitionErrorsMask()
 
@@ -97,7 +97,7 @@ class PyPICAM():
         print "Setting temp setpoint to -120C"
         print Picam_SetParameterFloatingPointValue(self.camera, ctypes.c_int(PicamParameter_SensorTemperatureSetPoint), pi32f(-120.0))
 
-        print "Setting trigger to shift per trigger"
+        print "Setting trigger mode"
     # From picam.h: the enumeration of these options is:
     # PicamTriggerResponse_NoResponse               = 1,
     # PicamTriggerResponse_ReadoutPerTrigger        = 2,
@@ -105,9 +105,12 @@ class PyPICAM():
     # PicamTriggerResponse_ExposeDuringTriggerPulse = 4,
     # PicamTriggerResponse_StartOnSingleTrigger     = 5
 
-        TriggerResponse = ctypes.c_int(3)  # readout per trigger
-        #print Picam_SetParameterIntegerValue(self.camera, ctypes.c_int(PicamParameter_TriggerResponse), TriggerResponse)
+        TriggerResponse = ctypes.c_int(2)  
+        print Picam_SetParameterIntegerValue(self.camera, ctypes.c_int(PicamParameter_TriggerResponse), TriggerResponse)
 
+        ShutterMode = ctypes.c_int(3)  # always open
+        print Picam_SetParameterIntegerValue(self.camera, ctypes.c_int(PicamParameter_ShutterTimingMode), ShutterMode)
+ 
         ## Commit parameters:
         failed_parameters = ctypes.c_int() # not sure this is "the right thing" but it seems to work
         failed_parameters_count = piint()
