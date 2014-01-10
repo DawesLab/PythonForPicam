@@ -194,10 +194,6 @@ if __name__ == '__main__':
     print data
 
     ## Close camera
-    print "Closing camera..."
-    print Picam_CloseCamera(newcam.camera)
-
-    ## Close down library
-    print 'Uninitializing...'
-    print Picam_UninitializeLibrary()
-    print 'Clean exit'
+    print "Closing camera and uninitializing library..."
+    print newcam.close()
+    print "Clean exit"
