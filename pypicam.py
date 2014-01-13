@@ -105,12 +105,15 @@ class PyPICAM():
     # PicamTriggerResponse_ExposeDuringTriggerPulse = 4,
     # PicamTriggerResponse_StartOnSingleTrigger     = 5
 
-        TriggerResponse = ctypes.c_int(2)  
+        TriggerResponse = ctypes.c_int(1)  # ignore trigger for now, we use ExposeMonitor as master trigger
         print Picam_SetParameterIntegerValue(self.camera, ctypes.c_int(PicamParameter_TriggerResponse), TriggerResponse)
 
         ShutterMode = ctypes.c_int(3)  # always open
         print Picam_SetParameterIntegerValue(self.camera, ctypes.c_int(PicamParameter_ShutterTimingMode), ShutterMode)
- 
+
+        # Set exposure time to 20 ms
+        print Picam_SetParameterFloatingPointValue(self.camera, ctypes.c_int(PicamParameter_ExposureTime), pi32f(20.0))
+
         ## Commit parameters:
         failed_parameters = ctypes.c_int() # not sure this is "the right thing" but it seems to work
         failed_parameters_count = piint()
