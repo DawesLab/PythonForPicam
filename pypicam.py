@@ -84,10 +84,22 @@ class PyPICAM():
 
 
     def close(self):
-        """ Close camera and uninitialize PICAM library"""
-        print 'closing camera'
+        """ Return shutter to normal, close camera, and uninitialize PICAM library"""
+
+        ShutterMode = ctypes.c_int(1)  # normal
+        print Picam_SetParameterIntegerValue(self.camera, ctypes.c_int(PicamParameter_ShutterTimingMode), ShutterMode)
+        ## Commit parameters:
+        failed_parameters = ctypes.c_int() # not sure this is "the right thing" but it seems to work
+        failed_parameters_count = piint()
+        print Picam_CommitParameters(self.camera, ctypes.byref(failed_parameters), ctypes.byref(failed_parameters_count))
+        print "Committed parameters (default shutter status)"
+        print Picam_DestroyParameters(failed_parameters)
+
+        print "Closing camera"
         Picam_CloseCamera(self.camera)
+        print "Uninitializing library"
         Picam_UninitializeLibrary()
+
 
 
     def configure_camera(self, T=-120):
