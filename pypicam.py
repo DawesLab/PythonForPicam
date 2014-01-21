@@ -70,7 +70,7 @@ print '\n'
 class PyPICAM():
     """Provides basic camera features and init"""
     camera = PicamHandle()
-    readoutstride = piint(0);
+    readoutstride = piint(0)
     readout_count = pi64s(1)
     readout_time_out = piint(-1) # -1 is same as NO_TIMEOUT?
     available = PicamAvailableData()
@@ -135,9 +135,11 @@ class PyPICAM():
 
 
     def get_temp(self):
-        temp = pi32f()
+        temp = ctypes.c_double()
         print Picam_GetParameterFloatingPointValue(self.camera, ctypes.c_int(PicamParameter_SensorTemperatureReading), ctypes.byref(temp))
-        return temp
+        print "Temp = %.1f" % temp.value
+
+
 
     def acquire(self, N=1):
         self.readout_count = pi64s(N)
