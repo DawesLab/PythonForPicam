@@ -115,3 +115,9 @@ class PicamRoi(ctypes.Structure):
 class PicamRois(ctypes.Structure):
     _fields_ = [("roi_array",ctypes.POINTER(PicamRoi)),
                 ("roi_count",piint)]
+
+    # the following is based on: 
+    # http://stackoverflow.com/questions/17101845/python-ctypes-array-of-structs
+    def __init__(self):
+        elements = (PicamRoi * 10)() # assume 10 rois at the most
+        self.roi_array = ctypes.cast(elements,ctypes.POINTER(PicamRoi))
