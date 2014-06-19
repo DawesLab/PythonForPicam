@@ -120,6 +120,9 @@ class PyPICAM():
         #TriggerResponse = ctypes.c_int(1)  # ignore trigger for now, we use ExposeMonitor as master trigger
         #print Picam_SetParameterIntegerValue(self.camera, ctypes.c_int(PicamParameter_TriggerResponse), TriggerResponse)
 
+        # Set ROI to x = 100:700 y = 195:205
+
+
         ShutterMode = ctypes.c_int(3)  # always open
         print Picam_SetParameterIntegerValue(self.camera, ctypes.c_int(PicamParameter_ShutterTimingMode), ShutterMode)
 

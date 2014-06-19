@@ -4,7 +4,7 @@
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or any 
+    the Free Software Foundation, either version 3 of the License, or any
     later version.
 
     This program is distributed in the hope that it will be useful,
@@ -103,3 +103,15 @@ class PicamAcquisitionStatus(ctypes.Structure):
                 ("errors",PicamAcquisitionErrorsMask),
                 ("readout_rate",piflt)]
 
+# PicamRoi
+class PicamRoi(ctypes.Structure):
+    _fields_ = [("x",piint),
+                ("width",piint),
+                ("x_binning",piint),
+                ("y",piint),
+                ("height",piint),
+                ("y_binning",piint)]
+
+class PicamRois(ctypes.Structure):
+    _fields_ = [("roi_array",ctypes.POINTER(PicamRoi)),
+                ("roi_count",piint)]
