@@ -75,12 +75,12 @@ class PyPICAM():
     readout_time_out = piint(-1) # -1 is same as NO_TIMEOUT?
     available = PicamAvailableData()
     errors = PicamAcquisitionErrorsMask()
+    myroi = PicamRoi()
 
 
     def __init__(self):
         print 'Opening First Camera'
         print Picam_OpenFirstCamera(ctypes.byref(self.camera))
-        print "Getting readout stride. ", Picam_GetParameterIntegerValue( self.camera, ctypes.c_int(PicamParameter_ReadoutStride), ctypes.byref(self.readoutstride) );
 
 
     def close(self):
@@ -102,8 +102,10 @@ class PyPICAM():
 
 
 
-    def configure_camera(self, T=-120):
-        """ Sets 4 MHz ADC rate, temp parameter can be set as integer (Default T=-120) """
+    def configure_camera(self, T=-120, roi=[100,195,600,10,1,1]):
+        """ Sets 4 MHz ADC rate, temp parameter can be set as integer (Default T=-120)
+        roi is a parameter that controls the region of interest:
+        roi = [x,y,width,height,x_binning,y_binning]"""
         print "Setting 4 MHz ADC rate..."
         print Picam_SetParameterFloatingPointValue(self.camera, ctypes.c_int(PicamParameter_AdcSpeed), pi32f(4.0))
         print "Setting temp setpoint to -120C"
@@ -119,10 +121,20 @@ class PyPICAM():
 
         #TriggerResponse = ctypes.c_int(1)  # ignore trigger for now, we use ExposeMonitor as master trigger
         #print Picam_SetParameterIntegerValue(self.camera, ctypes.c_int(PicamParameter_TriggerResponse), TriggerResponse)
-
+        print "Setting ROI"
         # Set ROI to x = 100:700 y = 195:205
+        self.myroi.x = roi[0]
+        self.myroi.y = roi[1]
+        self.myroi.width = roi[2]
+        self.myroi.height = roi[3]
+        self.myroi.x_binning = roi[4]
+        self.myroi.y_binning = roi[5]
+        rois = PicamRois()
+        rois.roi_array = ctypes.pointer(self.myroi)
+        rois.roi_count = 1
+        print Picam_SetParameterRoisValue(self.camera, ctypes.c_int(PicamParameter_Rois), ctypes.pointer(rois))
 
-
+        # Set shutter mode:
         ShutterMode = ctypes.c_int(3)  # always open
         print Picam_SetParameterIntegerValue(self.camera, ctypes.c_int(PicamParameter_ShutterTimingMode), ShutterMode)
 
@@ -136,6 +148,7 @@ class PyPICAM():
         print "Cleaning up..."
         print Picam_DestroyParameters(failed_parameters)
 
+        print "Getting readout stride. ", Picam_GetParameterIntegerValue( self.camera, ctypes.c_int(PicamParameter_ReadoutStride), ctypes.byref(self.readoutstride) );
 
     def get_temp(self):
         temp = ctypes.c_double()
@@ -153,10 +166,10 @@ class PyPICAM():
         Returns numpy array with shape (400,1340) """
 
         """ Create an array type to hold 1340x400 16bit integers """
-        DataArrayType = pi16u*536000
+        DataArrayType = pi16u*self.myroi.width*self.myroi.height
 
         """ Create pointer type for the above array type """
-        DataArrayPointerType = ctypes.POINTER(pi16u*536000)
+        DataArrayPointerType = ctypes.POINTER(pi16u*self.myroi.width*self.myroi.height)
 
         """ Create an instance of the pointer type, and point it to initial readout contents (memory address?) """
         DataPointer = ctypes.cast(self.available.initial_readout,DataArrayPointerType)
@@ -166,24 +179,24 @@ class PyPICAM():
         # TODO, check this stuff for slowdowns
         rawdata = DataPointer.contents
         numpydata = numpy.frombuffer(rawdata, dtype='uint16')
-        data = numpy.reshape(numpydata,(400,1340))  # TODO: get dimensions officially,
+        data = numpy.reshape(numpydata,(self.myroi.height,self.myroi.width))  # TODO: get dimensions officially,
         # note, the readoutstride is the number of bytes in the array, not the number of elements
         # will need to be smarter about the array size, but for now it works.
         return data
 
     def get_all_data(self):
         """ Routine to access all data shots from multi-shot run.
-        Returns numpy array with shape (400,1340,shotcount)."""
+        Returns numpy array with shape (x,y,shotcount)."""
         shotcount = self.available.readout_count
         stride = self.readoutstride.value
 
         """ Create an array type to hold 1340x400 16bit integers """
-        DataArrayType = pi16u*536000
+        DataArrayType = pi16u*self.myroi.width*self.myroi.height
 
         """ Create pointer type for the above array type """
-        DataArrayPointerType = ctypes.POINTER(pi16u*536000)
+        DataArrayPointerType = ctypes.POINTER(pi16u*self.myroi.width*self.myroi.height)
 
-        data = numpy.zeros((400,1340,shotcount))
+        data = numpy.zeros((self.myroi.height,self.myroi.width,shotcount))
 
         for shot in range(shotcount):
             """ Create an instance of the pointer type, and point it to initial readout (memory address) """
@@ -194,7 +207,7 @@ class PyPICAM():
             # TODO, check this stuff for slowdowns
             rawdata = DataPointer.contents
             numpydata = numpy.frombuffer(rawdata, dtype='uint16')
-            data[:,:,shot] = numpy.reshape(numpydata,(400,1340))
+            data[:,:,shot] = numpy.reshape(numpydata,(self.myroi.height,self.myroi.width))
 
         return data
 
