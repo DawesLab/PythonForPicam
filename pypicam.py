@@ -102,7 +102,7 @@ class PyPICAM():
 
 
 
-    def configure_camera(self, T=-120, roi=[100,195,600,10,1,1]):
+    def configure_camera(self, T=-120, roi=[200,195,600,10,1,1]):
         """ Sets 4 MHz ADC rate, temp parameter can be set as integer (Default T=-120)
         roi is a parameter that controls the region of interest:
         roi = [x,y,width,height,x_binning,y_binning]"""
