@@ -107,7 +107,7 @@ class PyPICAM():
         roi is a parameter that controls the region of interest:
         roi = [x,y,width,height,x_binning,y_binning]"""
         print "Setting 4 MHz ADC rate..."
-        print Picam_SetParameterFloatingPointValue(self.camera, ctypes.c_int(PicamParameter_AdcSpeed), pi32f(4.0))
+        print Picam_SetParameterFloatingPointValue(self.camera, ctypes.c_int(PicamParameter_AdcSpeed), pi32f(2.0))
         print "Setting temp setpoint to -120C"
         print Picam_SetParameterFloatingPointValue(self.camera, ctypes.c_int(PicamParameter_SensorTemperatureSetPoint), pi32f(-120.0))
 
