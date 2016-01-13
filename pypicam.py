@@ -57,15 +57,15 @@ def load(x):
 picamLibrary = 'libpicam.so'
 picam = load(picamLibrary) # Not sure where to put these?
 
-print 'Initialize Camera.',Picam_InitializeLibrary()
-print '\n'
+print('Initialize Camera.',Picam_InitializeLibrary())
+print('\n')
 major = piint()
 minor = piint()
 distribution = piint()
 release = piint()
-print 'Check Software Version. ',Picam_GetVersion(pointer(major),pointer(minor),pointer(distribution),pointer(release))
-print 'Picam Version ',major.value,'.',minor.value,'.',distribution.value,' Released: ',release.value
-print '\n'
+print('Check Software Version. ',Picam_GetVersion(pointer(major),pointer(minor),pointer(distribution),pointer(release)))
+print('Picam Version ',major.value,'.',minor.value,'.',distribution.value,' Released: ',release.value)
+print('\n')
 
 class PyPICAM():
     """Provides basic camera features and init"""
@@ -79,25 +79,25 @@ class PyPICAM():
 
 
     def __init__(self):
-        print 'Opening First Camera'
-        print Picam_OpenFirstCamera(ctypes.byref(self.camera))
+        print('Opening First Camera')
+        print(Picam_OpenFirstCamera(ctypes.byref(self.camera)))
 
 
     def close(self):
         """ Return shutter to normal, close camera, and uninitialize PICAM library"""
 
         ShutterMode = ctypes.c_int(1)  # normal
-        print Picam_SetParameterIntegerValue(self.camera, ctypes.c_int(PicamParameter_ShutterTimingMode), ShutterMode)
+        print(Picam_SetParameterIntegerValue(self.camera, ctypes.c_int(PicamParameter_ShutterTimingMode), ShutterMode))
         ## Commit parameters:
         failed_parameters = ctypes.c_int() # not sure this is "the right thing" but it seems to work
         failed_parameters_count = piint()
-        print Picam_CommitParameters(self.camera, ctypes.byref(failed_parameters), ctypes.byref(failed_parameters_count))
-        print "Committed parameters (default shutter status)"
-        print Picam_DestroyParameters(failed_parameters)
+        print(Picam_CommitParameters(self.camera, ctypes.byref(failed_parameters), ctypes.byref(failed_parameters_count)))
+        print("Committed parameters (default shutter status)")
+        print(Picam_DestroyParameters(failed_parameters))
 
-        print "Closing camera"
+        print("Closing camera")
         Picam_CloseCamera(self.camera)
-        print "Uninitializing library"
+        print("Uninitializing library")
         Picam_UninitializeLibrary()
 
 
@@ -106,12 +106,12 @@ class PyPICAM():
         """ Sets 4 MHz ADC rate, temp parameter can be set as integer (Default T=-120)
         roi is a parameter that controls the region of interest:
         roi = [x,y,width,height,x_binning,y_binning]"""
-        print "Setting 4 MHz ADC rate..."
-        print Picam_SetParameterFloatingPointValue(self.camera, ctypes.c_int(PicamParameter_AdcSpeed), pi32f(2.0))
-        print "Setting temp setpoint to -120C"
-        print Picam_SetParameterFloatingPointValue(self.camera, ctypes.c_int(PicamParameter_SensorTemperatureSetPoint), pi32f(-120.0))
+        print("Setting 4 MHz ADC rate...")
+        print(Picam_SetParameterFloatingPointValue(self.camera, ctypes.c_int(PicamParameter_AdcSpeed), pi32f(2.0)))
+        print("Setting temp setpoint to -120C")
+        print(Picam_SetParameterFloatingPointValue(self.camera, ctypes.c_int(PicamParameter_SensorTemperatureSetPoint), pi32f(-120.0)))
 
-        print "Setting trigger mode"
+        print("Setting trigger mode")
     # From picam.h: the enumeration of these options is:
     # PicamTriggerResponse_NoResponse               = 1,
     # PicamTriggerResponse_ReadoutPerTrigger        = 2,
@@ -120,8 +120,8 @@ class PyPICAM():
     # PicamTriggerResponse_StartOnSingleTrigger     = 5
 
         #TriggerResponse = ctypes.c_int(1)  # ignore trigger for now, we use ExposeMonitor as master trigger
-        #print Picam_SetParameterIntegerValue(self.camera, ctypes.c_int(PicamParameter_TriggerResponse), TriggerResponse)
-        print "Setting ROI"
+        #print(Picam_SetParameterIntegerValue(self.camera, ctypes.c_int(PicamParameter_TriggerResponse), TriggerResponse)
+        print("Setting ROI")
         # Set ROI to x = 100:700 y = 195:205
         self.myroi.x = roi[0]
         self.myroi.y = roi[1]
@@ -132,34 +132,34 @@ class PyPICAM():
         rois = PicamRois()
         rois.roi_array = ctypes.pointer(self.myroi)
         rois.roi_count = 1
-        print Picam_SetParameterRoisValue(self.camera, ctypes.c_int(PicamParameter_Rois), ctypes.pointer(rois))
+        print(Picam_SetParameterRoisValue(self.camera, ctypes.c_int(PicamParameter_Rois), ctypes.pointer(rois)))
 
         # Set shutter mode:
         ShutterMode = ctypes.c_int(3)  # always open
-        print Picam_SetParameterIntegerValue(self.camera, ctypes.c_int(PicamParameter_ShutterTimingMode), ShutterMode)
+        print(Picam_SetParameterIntegerValue(self.camera, ctypes.c_int(PicamParameter_ShutterTimingMode), ShutterMode))
 
         # Set exposure time to 20 ms
-        print Picam_SetParameterFloatingPointValue(self.camera, ctypes.c_int(PicamParameter_ExposureTime), pi32f(20))
+        print(Picam_SetParameterFloatingPointValue(self.camera, ctypes.c_int(PicamParameter_ExposureTime), pi32f(20)))
 
         ## Commit parameters:
         failed_parameters = ctypes.c_int() # not sure this is "the right thing" but it seems to work
         failed_parameters_count = piint()
-        print Picam_CommitParameters(self.camera, ctypes.byref(failed_parameters), ctypes.byref(failed_parameters_count))
-        print "Cleaning up..."
-        print Picam_DestroyParameters(failed_parameters)
+        print(Picam_CommitParameters(self.camera, ctypes.byref(failed_parameters), ctypes.byref(failed_parameters_count)))
+        print("Cleaning up...")
+        print(Picam_DestroyParameters(failed_parameters))
 
-        print "Getting readout stride. ", Picam_GetParameterIntegerValue( self.camera, ctypes.c_int(PicamParameter_ReadoutStride), ctypes.byref(self.readoutstride) );
+        print("Getting readout stride. ", Picam_GetParameterIntegerValue( self.camera, ctypes.c_int(PicamParameter_ReadoutStride), ctypes.byref(self.readoutstride) ))
 
     def get_temp(self):
         temp = ctypes.c_double()
-        print Picam_GetParameterFloatingPointValue(self.camera, ctypes.c_int(PicamParameter_SensorTemperatureReading), ctypes.byref(temp))
-        print "Temp = %.1f" % temp.value
+        print(Picam_GetParameterFloatingPointValue(self.camera, ctypes.c_int(PicamParameter_SensorTemperatureReading), ctypes.byref(temp)))
+        print("Temp = %.1f" % temp.value)
 
 
 
     def acquire(self, N=1):
         self.readout_count = pi64s(N)
-        print Picam_Acquire(self.camera, self.readout_count, self.readout_time_out, ctypes.byref(self.available), ctypes.byref(self.errors))
+        print(Picam_Acquire(self.camera, self.readout_count, self.readout_time_out, ctypes.byref(self.available), ctypes.byref(self.errors)))
 
     def get_data(self):
         """ Routine to access initial data.
@@ -223,10 +223,10 @@ if __name__ == '__main__':
     newcam.configure_camera()
     newcam.acquire(N=1)
     data = newcam.get_data()
-    print "Collected data:"
-    print data
+    print("Collected data:")
+    print(data)
 
     ## Close camera
-    print "Closing camera and uninitializing library..."
-    print newcam.close()
-    print "Clean exit"
+    print("Closing camera and uninitializing library...")
+    print(newcam.close())
+    print("Clean exit")
