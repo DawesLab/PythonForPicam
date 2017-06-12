@@ -106,7 +106,7 @@ class PyPICAM():
         """ Sets 4 MHz ADC rate, temp parameter can be set as integer (Default T=-120)
         roi is a parameter that controls the region of interest:
         roi = [x,y,width,height,x_binning,y_binning]"""
-        print("Setting 4 MHz ADC rate...")
+        print("Setting 2 MHz ADC rate...")
         print(Picam_SetParameterFloatingPointValue(self.camera, ctypes.c_int(PicamParameter_AdcSpeed), pi32f(2.0)))
         print("Setting temp setpoint to -120C")
         print(Picam_SetParameterFloatingPointValue(self.camera, ctypes.c_int(PicamParameter_SensorTemperatureSetPoint), pi32f(-120.0)))
@@ -138,8 +138,13 @@ class PyPICAM():
         ShutterMode = ctypes.c_int(3)  # always open
         print(Picam_SetParameterIntegerValue(self.camera, ctypes.c_int(PicamParameter_ShutterTimingMode), ShutterMode))
 
-        # Set exposure time to 20 ms
-        print(Picam_SetParameterFloatingPointValue(self.camera, ctypes.c_int(PicamParameter_ExposureTime), pi32f(20)))
+        print("Setting exposure time to 1 ms:")
+        # Set exposure time to 1 ms
+        print(Picam_SetParameterFloatingPointValue(self.camera, ctypes.c_int(PicamParameter_ExposureTime), pi32f(1.0)))
+
+        # Enable Clean cycles:
+        # CleanCount = ctypes.c_int(1) # one cleaning cycle
+        # print(Picam_SetParameterIntegerValue(self.camera, ctypes.c_int(PicamParameter_CleanCycleCount), CleanCount))
 
         ## Commit parameters:
         failed_parameters = ctypes.c_int() # not sure this is "the right thing" but it seems to work
