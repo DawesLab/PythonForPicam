@@ -26,7 +26,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
 
-A Python 2.7 Interface for PICAM Library
+A Python Interface for PICAM Library
 ----------------------------------------
 
 The interface can nominally be run by building Main.py
@@ -55,6 +55,10 @@ PiParameterLookup.py
 - Import `libpicam.so` library instead of DLLs
 - `pypicam.py` is written as a basic module to provide simple access
 to the first camera loaded by the system.
+
+2016 January 13 -- Modifications to run under Python 3
+------------------------------
+Simply replaced all `print ...` statements with `print(...)` statements. To use this under python 2, simply checkout commit [a970928](https://github.com/DawesLab/PythonForPicam/commit/a970928a64388cb1ee5bdc1a7f5f8e956f6413d9) instead of the latest.
 
 TODO
 -----------------------------
